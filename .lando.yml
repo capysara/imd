@@ -1,0 +1,11 @@
+name: imd
+recipe: drupal9
+config:
+  webroot: web
+  xdebug: true
+  config:
+    php: ./config/xdebug.ini
+  appserver:
+    install_dependencies_as_root:
+      - apt-get update -y
+      - apt-get install vim -y
