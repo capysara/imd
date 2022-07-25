@@ -1,0 +1,10 @@
+# Schema for the configuration files of the Drupaleasy repositories module.
+drupaleasy_repositories.settings:
+  type: config_object
+  label: 'Drupaleasy repositories settings'
+  mapping:
+    repositories:
+      type: sequence
+      label: 'Repositories'
+      sequence:
+        type: string
