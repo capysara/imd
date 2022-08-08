@@ -1,0 +1,17 @@
+uuid: 57e4fd1a-b902-4407-9cc5-1df20d64cbdc
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus: {  }
+    parent: ''
+name: Repository
+type: repository
+description: 'This is used by the DrupalEasy Repositories module to collect metadata about remote repositories.'
+help: ''
+new_revision: false
+preview_mode: 0
+display_submitted: false
