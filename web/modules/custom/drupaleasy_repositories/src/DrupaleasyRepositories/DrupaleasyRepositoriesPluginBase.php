@@ -18,13 +18,7 @@ abstract class DrupaleasyRepositoriesPluginBase extends PluginBase implements Dr
   }
 
   /**
-   * Default implementation to validate repository URLs.
-   *
-   * @param string $uri
-   *   The URI to validate.
-   *
-   * @return bool
-   *   Returns FALSE is not valid.
+   * {@inheritdoc}
    */
   public function validate(string $uri): bool {
     // SCK - validator always returns FALSE as a safety measure. It forces
@@ -50,8 +44,8 @@ abstract class DrupaleasyRepositoriesPluginBase extends PluginBase implements Dr
    * @return array
    *   An array containing info about a single repository.
    */
-  protected function mapToCommonFormat(string $full_name, string $label, string $description, int $num_open_issues, string $url): array {
-    $repo_info[$full_name] = [
+  protected function mapToCommonFormat(string $machine_name, string $label, string $description, int $num_open_issues, string $url): array {
+    $repo_info[$machine_name] = [
       'label' => $label,
       'description' => $description,
       'num_open_issues' => $num_open_issues,

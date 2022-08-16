@@ -30,8 +30,8 @@ class DrupaleasyRepositoriesPluginManager extends DefaultPluginManager {
       $namespaces,
       $module_handler,
       'Drupal\drupaleasy_repositories\DrupaleasyRepositories\DrupaleasyRepositoriesInterface',
-      'Drupal\drupaleasy_repositories\Annotation\DrupaleasyRepositories'
-    );
+      'Drupal\drupaleasy_repositories\Annotation\DrupaleasyRepositories');
+
     // This exposes a new hook hook_drupaleasy_respositories_info_alter
     // (Mike never uses it.)
     $this->alterInfo('drupaleasy_repositories_info');
