@@ -13,7 +13,7 @@ use Drupal\drupaleasy_repositories\Plugin\DrupaleasyRepositories\YmlRemote;
 class YmlRemoteTest extends UnitTestCase {
 
   /**
-   * The .yml remote plugin.
+   * This is the YmlRemote plugin.
    *
    * @var \Drupal\drupaleasy_repositories\Plugin\DrupaleasyRepositories\YmlRemote
    */
@@ -39,6 +39,10 @@ class YmlRemoteTest extends UnitTestCase {
 
   /**
    * Data provider for testValidate().
+   *
+   * phpcs:ignore
+   * @return array<int, array<int, bool|string>>
+   *   Array of test strings and results.
    */
   public function validateProvider(): array {
     return [
@@ -56,14 +60,26 @@ class YmlRemoteTest extends UnitTestCase {
       ],
       [
         'https://www.mysite.com/anything.yaml',
-        FALSE,
+        TRUE,
       ],
       [
         '/var/www/html/anything.yaml',
         FALSE,
       ],
       [
-        'https://www.mysite.com/some%20anything.yml',
+        'https://www.mysite.com/some%20directory/anything.yml',
+        TRUE,
+      ],
+      [
+        'https://www.my-site.com/some%20directory/anything.yaml',
+        TRUE,
+      ],
+      [
+        'https://localhost/some%20directory/anything.yaml',
+        TRUE,
+      ],
+      [
+        'https://dev.www.mysite.com/anything.yml',
         TRUE,
       ],
     ];
@@ -77,7 +93,7 @@ class YmlRemoteTest extends UnitTestCase {
    * @covers ::validate
    * @test
    */
-  public function testValidate($testString, $expected): void {
+  public function testValidate(string $testString, bool $expected): void {
     self::assertEquals($expected, $this->ymlRemote->validate($testString));
   }
 
