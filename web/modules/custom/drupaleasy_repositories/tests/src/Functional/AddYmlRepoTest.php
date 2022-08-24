@@ -141,7 +141,7 @@ class AddYmlRepoTest extends BrowserTestBase {
     $session->responseContains('The changes have been saved.');
     // We can't check for the following message unless we also have the future
     // drupaleasy_notify module enabled.
-    $session->responseContains('The repo named <em class="placeholder">The Batman repository</em> has been created');
+    // $session->responseContains('The repo named <em class="placeholder">The Batman repository</em> has been created');
 
     // Find the new repository node.
     /** @var \Drupal\Core\Entity\Query\QueryInterface $query */
