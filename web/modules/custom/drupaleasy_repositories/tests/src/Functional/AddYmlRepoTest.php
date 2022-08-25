@@ -166,4 +166,45 @@ class AddYmlRepoTest extends BrowserTestBase {
 
   }
 
+  /**
+   * Test that a yml repo can be added to profile by a user.
+   *
+   * This tests that a yml-based repo can be added to a user's profile and
+   * that a repository node is successfully created upon saving the profile.
+   *
+   * @test
+   */
+  public function testRemoveYmlRepo(): void {
+    // Create and login as a Drupal user with permission to access
+    // content.
+    $user = $this->drupalCreateUser(['access content']);
+    $this->drupalLogin($user);
+
+    // Start the browsing session.
+    $session = $this->assertSession();
+
+    // Navigate to their edit profile page and confirm we can reach it.
+    $this->drupalGet('/user/' . $user->id() . '/edit');
+    // Try this with a 500 status code to see it fail.
+    $session->statusCodeEquals(200);
+
+    // Set the path to empty string.
+    $edit = ['field_repository_url[0][uri]' => ''];
+
+    $this->submitForm($edit, 'Save');
+    $session->statusCodeEquals(200);
+    $session->responseContains('The changes have been saved.');
+    // We can't check for the following message unless we also have the future
+    // drupaleasy_notify module enabled.
+    // $session->responseContains('The repo named <em class="placeholder">The Batman repository</em> has been created');
+
+    // Find the new repository node.
+    /** @var \Drupal\Core\Entity\Query\QueryInterface $query */
+    $query = \Drupal::entityQuery('node');
+    $query->condition('type', 'repository')->accessCheck(FALSE);
+    $results = $query->execute();
+    $session->assert(count($results) === 0, 'More than one repository node was found.');
+
+  }
+
 }

@@ -20,7 +20,9 @@ class YmlRemote extends DrupaleasyRepositoriesPluginBase {
    * {@inheritdoc}
    */
   public function validate(string $uri): bool {
-    $pattern = '|^https?://[a-zA-Z0-9.\-]+/[a-zA-Z0-9_\-.%/]+\.ya?ml$|';
+    // $pattern = '|^https?://[a-zA-Z0-9.\-]+/[a-zA-Z0-9_\-.%/]+\.ya?ml$|';
+    // $pattern = '|https://imd.lndo.site/batman-repo.yml|';
+    $pattern = '|https://imd.lndo.site/batman-repo.txt|';
 
     if (preg_match($pattern, $uri) === 1) {
       return TRUE;
@@ -39,7 +41,18 @@ class YmlRemote extends DrupaleasyRepositoriesPluginBase {
    * {@inheritdoc}
    */
   public function getRepo(string $uri): array {
-    if (file_exists($uri)) {
+    // My site doesn't agree that http://imd.lndo.site/batman-repo.yml exists.
+    // With `file($uri)` I get a nice error and it doesn't allow me to submit.
+    // Without it, I'm allowed to submit, but it still doesn't create the node.
+    // If I manually create a node, then save my user (with no changes), the
+    // Repository node gets deleted as expected.
+    // `file_exists` gets rid of the php. `file` doesn't.
+    // If I comment out the entire `validate` method, then I get the nice error
+    // not the php warning.
+    // Mike's note: File_exists doesn't work with files over http.
+    // if (file_exists($uri)) {
+    dump($uri); // "https://imd.lndo.site/batman-repo.yml"
+    if (file($uri)) {
       if ($file_content = file_get_contents($uri)) {
         $repo_info = Yaml::decode($file_content);
         $machine_name = array_key_first($repo_info);

@@ -49,14 +49,12 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
    */
   protected ModuleHandler $moduleHandler;
 
-
   /**
    * An admin user.
    *
    * @var \Drupal\user\UserInterface
    */
   protected UserInterface $adminUser;
-
 
   /**
    * {@inheritdoc}
@@ -145,6 +143,64 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
   }
 
   /**
+   * Data provider for testValidateRepositoryUrls().
+   *
+   * @return array
+   *   Test data and expected results.
+   */
+  public function provideValidateRepositoryUrls(): array {
+    // This is run before setup() and other things so $this->container
+    // isn't available here!
+    return [
+      ['', [['uri' => '/tests/assets/batman-repo.yml']]],
+      ['is not valid', [['uri' => '/tests/assets/batman-repo.ym']]],
+    ];
+  }
+
+  // /**
+  //  * Test the ability for the service to ensure repositories are valid.
+  //  *
+  //  * @covers ::validateRepositoryUrls
+  //  * @dataProvider provideValidateRepositoryUrls
+  //  * @test
+  //  */
+  // public function testValidateRepositoryUrls(string $expected, array $urls): void {
+  //   // Get the full path to the test .yml file.
+  //   /** @var \Drupal\Core\Extension\Extension $module */
+  //   $module = $this->moduleHandler->getModule('drupaleasy_repositories');
+  //   $module_full_path = \Drupal::request()->getUri() . $module->getPath();
+  //
+  //   foreach ($urls as $key => $url) {
+  //     if (isset($url['uri'])) {
+  //       $urls[$key]['uri'] = $module_full_path . $url['uri'];
+  //     }
+  //   }
+  //
+  //   $actual = $this->drupaleasyRepositoriesService->validateRepositoryUrls($urls, 999);
+  //   // Only check assertion if no error is expected nor returned.
+  //   if (($expected != '') || ($actual != $expected)) {
+  //     //$repo = reset($repo);
+  //     $this->assertTrue((bool) mb_stristr($actual, $expected), "The URLs' validation error ' . $actual . ' does not match the expected value.");
+  //   }
+  // }
+
+  /**
+   * Test the ability for the service to ensure repositories are valid.
+   *
+   * @covers ::validateRepositoryUrls
+   * @dataProvider provideValidateRepositoryUrls
+   * @test
+   */
+  public function testValidateRepositoryUrls(string $expected, array $urls): void {
+    $actual = $this->drupaleasyRepositoriesService->validateRepositoryUrls($urls, 999);
+    // Only check assertion if no error is expected nor returned as mb_stristr()
+    // doesn't work when the 'needle' ($expected) is an empty string.
+    if (($expected != '') || ($actual != $expected)) {
+      $this->assertTrue((bool) mb_stristr($actual, $expected), "The URLs' validation does not match the expected value. Actual: {$actual}, Expected: {$expected}");
+    }
+  }
+
+  /**
    * Returns sample repository info.
    *
    * @return array
@@ -160,48 +216,6 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
       'url' => 'http://example.com/aquaman-repo.yml',
     ];
     return $repo;
-  }
-
-  /**
-   * Data provider for testValidateRepositoryUrls().
-   *
-   * @return array
-   *   Test data and expected results.
-   */
-  public function provideValidateRepositoryUrls(): array {
-    // This is run before setup() and other things so $this->container
-    // isn't available here!
-    return [
-      ['', [['uri' => '/tests/assets/batman-repo.yml']]],
-      ['is not valid', [['uri' => '/tests/assets/batman-repo.ym']]],
-    ];
-  }
-
-  /**
-   * Test the ability for the service to ensure repositories are valid.
-   *
-   * @covers ::validateRepositoryUrls
-   * @dataProvider provideValidateRepositoryUrls
-   * @test
-   */
-  public function testValidateRepositoryUrls(string $expected, array $urls): void {
-    // Get the full path to the test .yml file.
-    /** @var \Drupal\Core\Extension\Extension $module */
-    $module = $this->moduleHandler->getModule('drupaleasy_repositories');
-    $module_full_path = \Drupal::request()->getUri() . $module->getPath();
-
-    foreach ($urls as $key => $url) {
-      if (isset($url['uri'])) {
-        $urls[$key]['uri'] = $module_full_path . $url['uri'];
-      }
-    }
-
-    $actual = $this->drupaleasyRepositoriesService->validateRepositoryUrls($urls, 999);
-    // Only check assertion if no error is expected nor returned.
-    if (($expected != '') || ($actual != $expected)) {
-      //$repo = reset($repo);
-      $this->assertTrue((bool) mb_stristr($actual, $expected), "The URLs' validation error ' . $actual . ' does not match the expected value.");
-    }
   }
 
 }
