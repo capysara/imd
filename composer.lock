@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5401f65c53ec63010eb5ab510ba8a911",
+    "content-hash": "7a8cb369615140e40efc446aec12ef1f",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1084,6 +1084,35 @@
                 "source": "https://github.com/drupal/core-recommended/tree/9.4.3"
             },
             "time": "2022-07-20T15:11:38+00:00"
+        },
+        {
+            "name": "drupaleasy/drupaleasy_notify",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "./modules/drupaleasy_notify",
+                "reference": "4766b96fc8137dd0e38f6d1c6d39c22de5701204"
+            },
+            "require": {
+                "drupaleasy/drupaleasy_repositories": "^1.0"
+            },
+            "type": "drupal-custom-module",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "drupaleasy/drupaleasy_repositories",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "./modules/drupaleasy_repositories",
+                "reference": "e8b2fc9e4212a9e7b38c8c8cf9dc5473734ef51b"
+            },
+            "type": "drupal-custom-module",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "egulias/email-validator",
