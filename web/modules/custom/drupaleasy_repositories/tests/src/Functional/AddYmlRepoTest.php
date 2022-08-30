@@ -154,7 +154,7 @@ class AddYmlRepoTest extends BrowserTestBase {
     $entity_type_manager = \Drupal::entityTypeManager();
     /** @var \Drupal\Core\Entity\EntityStorageInterface $node_storage */
     $node_storage = $entity_type_manager->getStorage('node');
-    /** @var \Drupal\node\Entity\Node $node */
+    /** @var \Drupal\node\NodeInterface $node */
     $node = $node_storage->load(reset($results));
 
     // Check values.
@@ -167,7 +167,7 @@ class AddYmlRepoTest extends BrowserTestBase {
   }
 
   /**
-   * Test that a yml repo can be added to profile by a user.
+   * Test that a yml repo can be deleted....
    *
    * This tests that a yml-based repo can be added to a user's profile and
    * that a repository node is successfully created upon saving the profile.
@@ -185,8 +185,19 @@ class AddYmlRepoTest extends BrowserTestBase {
 
     // Navigate to their edit profile page and confirm we can reach it.
     $this->drupalGet('/user/' . $user->id() . '/edit');
-    // Try this with a 500 status code to see it fail.
-    $session->statusCodeEquals(200);
+
+    // Create a node first so I have something to delete.
+    // Get the full path to the test .yml file.
+    /** @var \Drupal\Core\Extension\ModuleHandler $module_handler */
+    $module_handler = \Drupal::service('module_handler');
+    /** @var \Drupal\Core\Extension\Extension $module */
+    $module = $module_handler->getModule('drupaleasy_repositories');
+    $module_full_path = \Drupal::request()->getUri() . $module->getPath();
+    // Add the test .yml file path and submit the form.
+    $edit = [
+      'field_repository_url[0][uri]' => $module_full_path . '/tests/assets/batman-repo.yml',
+    ];
+    $this->submitForm($edit, 'Save');
 
     // Set the path to empty string.
     $edit = ['field_repository_url[0][uri]' => ''];
@@ -203,7 +214,7 @@ class AddYmlRepoTest extends BrowserTestBase {
     $query = \Drupal::entityQuery('node');
     $query->condition('type', 'repository')->accessCheck(FALSE);
     $results = $query->execute();
-    $session->assert(count($results) === 0, 'More than one repository node was found.');
+    $session->assert(count($results) === 0, 'The repository node was not deleted.');
 
   }
 

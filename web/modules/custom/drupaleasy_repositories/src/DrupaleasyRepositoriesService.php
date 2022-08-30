@@ -2,11 +2,14 @@
 
 namespace Drupal\drupaleasy_repositories;
 
+use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\drupaleasy_repositories\DrupaleasyRepositories\DrupaleasyRepositoriesPluginManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\drupaleasy_repositories\Event\RepoUpdatedEvent;
+use Drupal\node\Entity\Node;
 
 /**
  * Service description.
@@ -45,6 +48,12 @@ class DrupaleasyRepositoriesService {
    */
   protected bool $dryRun = FALSE;
 
+  /**
+   * The Entity dispatcher service.
+   *
+   * @var \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher
+   */
+  protected ContainerAwareEventDispatcher $eventDispatcher;
 
   /**
    * Constructs a DrupaleasyRepositories object.
@@ -57,14 +66,21 @@ class DrupaleasyRepositoriesService {
    *   The entity_type.manager service.
    * @param bool $dry_run
    *   The dry_run parameter that specifies whether or not to save node changes.
+   * @param \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher $event_dispatcher
+   *   Drupal's event dispatcher service.
    */
-  public function __construct(DrupaleasyRepositoriesPluginManager $plugin_manager_drupaleasy_repositories, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, bool $dry_run) {
+  public function __construct(DrupaleasyRepositoriesPluginManager $plugin_manager_drupaleasy_repositories,
+                              ConfigFactoryInterface $config_factory,
+                              EntityTypeManagerInterface $entity_type_manager,
+                              bool $dry_run,
+                              ContainerAwareEventDispatcher $event_dispatcher) {
     // These 3^ are required in the services.yml arguments.
     // These are 3 services that have been injected into this service.
     $this->pluginManagerDrupaleasyRepositories = $plugin_manager_drupaleasy_repositories;
     $this->configFactory = $config_factory;
     $this->entityTypeManager = $entity_type_manager;
     $this->dryRun = $dry_run;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
@@ -253,7 +269,7 @@ class DrupaleasyRepositoriesService {
       if ($results) {
         // If we get here, a repository node exists for this repository machine
         // name.
-        /** @var \Drupal\node\NodeInterface $node */
+        /** @var \Drupal\node\Entity\Node $node */
         $node = $node_storage->load(reset($results));
 
         if ($hash != $node->get('field_hash')->value) {
@@ -267,13 +283,13 @@ class DrupaleasyRepositoriesService {
           $node->set('field_hash', $hash);
           if (!$this->dryRun) {
             $node->save();
-            //$this->repoUpdated($node, 'updated');
+            $this->repoUpdated($node, 'updated');
           }
         }
       }
       else {
         // Repository node doesn't exist - create a new one.
-        /** @var \Drupal\node\NodeInterface $node */
+        /** @var \Drupal\node\Entity\Node $node */
         $node = $node_storage->create([
           'uid' => $account->id(),
           'type' => 'repository',
@@ -287,7 +303,7 @@ class DrupaleasyRepositoriesService {
         ]);
         if (!$this->dryRun) {
           $node->save();
-          //$this->repoUpdated($node, 'created');
+          $this->repoUpdated($node, 'created');
         }
       }
     }
@@ -323,11 +339,11 @@ class DrupaleasyRepositoriesService {
     $results = $query->execute();
     if ($results) {
       $nodes = $node_storage->loadMultiple($results);
-      /** @var \Drupal\node\NodeInterface $node */
+      /** @var \Drupal\node\Entity\Node $node */
       foreach ($nodes as $node) {
         if (!$this->dryRun) {
           $node->delete();
-          //$this->repoUpdated($node, 'deleted');
+          $this->repoUpdated($node, 'deleted');
         }
       }
     }
@@ -349,22 +365,40 @@ class DrupaleasyRepositoriesService {
     $node_storage = $this->entityTypeManager->getStorage('node');
 
     // Calculate hash value.
-    $hash = md5(serialize(array_pop($repo_info)));
+    $repo_metadata = array_pop($repo_info);
 
-    // Look for repository nodes with a matching hash.
-    /** @var \Drupal\Core\Entity\Query\QueryInterface $query */
+    // Look for repository nodes with a matching url.
     $query = $node_storage->getQuery();
-    $query->condition('type', 'repository')
-      ->condition('field_hash', $hash)
+    $results = $query->condition('type', 'repository')
+      ->condition('field_url', $repo_metadata['url'])
       ->condition('uid', $uid, '<>')
-      ->accessCheck(FALSE);
-    $results = $query->execute();
+      ->accessCheck(FALSE)
+      ->execute();
 
     if (count($results)) {
       return FALSE;
     };
-
     return TRUE;
+
+  }
+
+  /**
+   * Perform tasks when a repository is created or updated.
+   *
+   * @param \Drupal\node\Entity\Node $node
+   *   The node that was updated.
+   * @param string $action
+   *   The action that was performed on the node: updated, created, or deleted.
+   */
+  protected function repoUpdated(Node $node, string $action) {
+    $event = new RepoUpdatedEvent($node, $action);
+    // This is like someone (a dispatcher) announcing, hey! I've got this new
+    // $event object that just happened in case anyone is interested. If
+    // anyone (a module) is interested, it can subscribe to the event.
+    // We pass in the event object and the name of the event (The name of the
+    // event might not be necessary, but it doesn't hurt to have in; it was
+    // there for backwards compatibility,
+    $this->eventDispatcher->dispatch($event, RepoUpdatedEvent::EVENT_NAME);
   }
 
 }

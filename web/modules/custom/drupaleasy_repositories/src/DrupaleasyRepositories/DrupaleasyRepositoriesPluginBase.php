@@ -30,7 +30,7 @@ abstract class DrupaleasyRepositoriesPluginBase extends PluginBase implements Dr
   /**
    * Build array of a single repository.
    *
-   * @param string $full_name
+   * @param string $machine_name
    *   The full name of the repository.
    * @param string $label
    *   The short name of the repository.
