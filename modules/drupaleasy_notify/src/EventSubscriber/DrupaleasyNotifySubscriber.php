@@ -6,7 +6,6 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\drupaleasy_repositories\Event\RepoUpdatedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Drupaleasy Notify event subscriber.

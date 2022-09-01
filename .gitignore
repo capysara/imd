@@ -74,3 +74,5 @@ deployment_identifier
 
 .idea
 .DS_Store
+
+/web/.htaccess
