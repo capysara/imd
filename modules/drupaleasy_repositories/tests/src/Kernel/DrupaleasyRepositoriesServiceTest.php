@@ -2,13 +2,13 @@
 
 namespace Drupal\Tests\drupaleasy_repositories\Kernel;
 
-use Drupal\Core\Extension\ModuleHandler;
 use Drupal\drupaleasy_repositories\DrupaleasyRepositoriesService;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\node\Entity\Node;
 use Drupal\Tests\drupaleasy_repositories\Traits\RepositoryContentTypeTrait;
 use Drupal\user\Entity\User;
+use Drupal\node\Entity\Node;
 use Drupal\user\UserInterface;
+use Drupal\Core\Extension\ModuleHandler;
 
 /**
  * Test description.
@@ -33,6 +33,7 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
     'text',
     // For link field types.
     'link',
+    'key',
   ];
 
   /**
@@ -95,7 +96,6 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
     $config = $this->config('drupaleasy_repositories.settings');
     $config->set('repositories', ['yml_remote' => 'yml_remote']);
     $config->save();
-
   }
 
   /**
@@ -157,33 +157,6 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
     ];
   }
 
-  // /**
-  //  * Test the ability for the service to ensure repositories are valid.
-  //  *
-  //  * @covers ::validateRepositoryUrls
-  //  * @dataProvider provideValidateRepositoryUrls
-  //  * @test
-  //  */
-  // public function testValidateRepositoryUrls(string $expected, array $urls): void {
-  //   // Get the full path to the test .yml file.
-  //   /** @var \Drupal\Core\Extension\Extension $module */
-  //   $module = $this->moduleHandler->getModule('drupaleasy_repositories');
-  //   $module_full_path = \Drupal::request()->getUri() . $module->getPath();
-  //
-  //   foreach ($urls as $key => $url) {
-  //     if (isset($url['uri'])) {
-  //       $urls[$key]['uri'] = $module_full_path . $url['uri'];
-  //     }
-  //   }
-  //
-  //   $actual = $this->drupaleasyRepositoriesService->validateRepositoryUrls($urls, 999);
-  //   // Only check assertion if no error is expected nor returned.
-  //   if (($expected != '') || ($actual != $expected)) {
-  //     //$repo = reset($repo);
-  //     $this->assertTrue((bool) mb_stristr($actual, $expected), "The URLs' validation error ' . $actual . ' does not match the expected value.");
-  //   }
-  // }
-
   /**
    * Test the ability for the service to ensure repositories are valid.
    *
@@ -192,30 +165,24 @@ class DrupaleasyRepositoriesServiceTest extends KernelTestBase {
    * @test
    */
   public function testValidateRepositoryUrls(string $expected, array $urls): void {
+    // Get the full path to the test .yml file.
+    /** @var \Drupal\Core\Extension\Extension $module */
+    $module = $this->moduleHandler->getModule('drupaleasy_repositories');
+    $module_full_path = \Drupal::request()->getUri() . $module->getPath();
+
+    foreach ($urls as $key => $url) {
+      if (isset($url['uri'])) {
+        $urls[$key]['uri'] = $module_full_path . $url['uri'];
+      }
+    }
+
     $actual = $this->drupaleasyRepositoriesService->validateRepositoryUrls($urls, 999);
-    // Only check assertion if no error is expected nor returned as mb_stristr()
-    // doesn't work when the 'needle' ($expected) is an empty string.
-    if (($expected != '') || ($actual != $expected)) {
+    if ($expected) {
       $this->assertTrue((bool) mb_stristr($actual, $expected), "The URLs' validation does not match the expected value. Actual: {$actual}, Expected: {$expected}");
     }
-  }
-
-  /**
-   * Returns sample repository info.
-   *
-   * @return array
-   *   The sample repository info.
-   */
-  protected function getAquamanRepo() {
-    // The order of elements of this array matters when calculating the hash.
-    $repo['aquaman-repository'] = [
-      'label' => 'The Aquaman repository',
-      'description' => 'This is where Aquaman keeps all his crime-fighting code.',
-      'num_open_issues' => 6,
-      'source' => 'yml',
-      'url' => 'http://example.com/aquaman-repo.yml',
-    ];
-    return $repo;
+    else {
+      $this->assertEquals($expected, $actual, "The URLs' validation does not match the expected value. Actual: {$actual}, Expected: {$expected}");
+    }
   }
 
 }
